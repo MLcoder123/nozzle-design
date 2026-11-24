@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工程热力学｜喷管设计</title>
+<style>
+:root{--bg:#f3f6fb;--panel:#fff;--ink:#17243a;--muted:#65748b;--blue:#2563eb;--line:#dce4ef;--green:#087f5b;--amber:#a16207}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,"Microsoft YaHei",sans-serif}.wrap{max-width:1180px;margin:auto;padding:28px 18px 56px}.hero{background:linear-gradient(120deg,#10284c,#1d4e89);color:white;padding:30px;border-radius:18px;margin-bottom:20px}.hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,34px)}.hero p{margin:0;color:#d8e7fa}.layout{display:grid;grid-template-columns:340px 1fr;gap:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:20px;box-shadow:0 5px 18px #19365a0a}.card h2{font-size:18px;margin:0 0 16px}.field{margin:13px 0}.field label{display:block;font-weight:650;margin-bottom:5px}.field input,.field select{width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:9px;font:inherit;background:#fff;color:var(--ink)}.unit{color:var(--muted);font-size:17px;margin-top:3px}.btn{border:0;background:var(--blue);color:white;padding:12px 16px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin-top:10px}.btn.secondary{background:#eaf1ff;color:#1d4ed8}.topnav{display:flex;gap:18px;margin:0 2px 16px;flex-wrap:wrap}.topnav a{color:#1d4ed8;text-decoration:none;font-weight:700;background:#eaf1ff;padding:8px 13px;border-radius:9px}.topnav a:hover{text-decoration:underline}.hint{font-size:12px;color:var(--muted);margin-top:12px}.main{display:grid;gap:18px}.status{padding:12px 14px;border-radius:10px;background:#eef5ff;color:#1e40af}.status.warn{background:#fff7e6;color:var(--amber)}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric{background:#f7f9fc;border:1px solid var(--line);padding:12px;border-radius:11px}.metric small{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:20px;margin-top:4px;overflow-wrap:anywhere}.metric em{font-style:normal;font-size:11px;color:var(--muted)}.svgwrap{width:100%;overflow:hidden}.svgwrap svg{width:100%;height:auto;display:block;background:#fbfdff;border:1px solid var(--line);border-radius:12px}.table{width:100%;border-collapse:collapse}.table td,.table th{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left}.table th{color:var(--muted);font-weight:600;font-size:13px}.eq{background:#f7f9fc;border-left:3px solid var(--blue);padding:10px 13px;margin:9px 0;border-radius:5px;font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere}.foot{color:var(--muted);font-size:12px;margin-top:18px}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.tag{display:inline-block;padding:3px 8px;background:#e9f7f1;color:var(--green);border-radius:20px;font-size:12px;margin-left:6px}.fric-box{border:1px dashed #cbd5e1;border-radius:11px;padding:13px 14px;margin:13px 0;background:#fafbfe}.fric-box .field{margin:9px 0}.fric-box .chk{display:flex;align-items:center;gap:8px;font-weight:650}.fric-box .chk input{width:auto}.compare{width:100%;border-collapse:collapse}.compare th,.compare td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}.compare th{color:var(--muted);font-weight:600;font-size:13px}.compare td.num{font-family:ui-monospace,Consolas,monospace}.col-ideal{color:var(--muted)}.col-actual{color:var(--ink);font-weight:650}.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;background:#fff4db;color:var(--amber)}.loss{background:#fef6f6;border-left:3px solid #e03131}@media(max-width:850px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+</style> 
+ <!-- <link rel="stylesheet" href="pink.css"> -->
+</head>
+<body><div class="wrap">
+<header class="hero"><h1>喷管设计与性能分析系统</h1><p>工程热力学 · 一维等熵流动 · 渐缩喷管 / 缩放喷管</p></header>
+<nav class="topnav"><a href="index.html">喷管设计</a><a href="theory.html">计算过程与理论依据 ↗</a></nav>
+<div class="layout">
+<aside class="card"><h2>设计参数输入</h2>
+<div class="field"><label for="gas">工质种类</label><select id="gas"><option value="N2">氮气 N₂</option><option value="air">空气</option><option value="Ar">氩气 Ar</option><option value="H2">氢气 H₂</option><option value="CO2">二氧化碳 CO₂</option><option value="He">氦气 He</option><option value="steam">水蒸气 H₂O（IAPWS-IF97）</option></select></div>
+<div class="field"><label for="p">初始压力 p₁（绝对压力）</label><input id="p" type="number" min="0.001" step="any" value="1000"><div class="unit">kPa</div></div>
+<div class="field"><label for="t">初始温度 T₁</label><input id="t" type="number" min="1" step="any" value="300"><div class="unit">K</div></div>
+<div class="field"><label for="v">初始速度 c₁</label><input id="v" type="number" min="0" step="any" value="50"><div class="unit">m/s</div></div>
+<div class="field"><label for="mdot">质量流量 ṁ</label><input id="mdot" type="number" min="0.000001" step="any" value="1"><div class="unit">kg/s</div></div>
+<div class="field"><label for="pb">背压 p_b</label><input id="pb" type="number" min="0.001" step="any" value="100"><div class="unit">kPa（绝对压力）</div></div>
+<div class="fric-box">
+<div class="chk"><input type="checkbox" id="fricOn" checked><label for="fricOn" style="margin:0">考虑喷管摩擦修正</label></div>
+<div class="field"><label for="phi">速度系数 φ</label><input id="phi" type="number" min="0.5" max="1" step="0.01" value="0.95"><div class="unit">φ = cₑ / cₑ,ₛ（实际速度 / 等熵速度），典型 0.92～0.98</div></div>
+<div class="field"><label for="eta">喷管效率 ηₙ</label><input id="eta" type="number" min="0.5" max="1" step="0.001" value="0.9025"><div class="unit">ηₙ = 实际焓降 / 等熵焓降 = φ²，与 φ 自动联动</div></div>
+</div>
+<button class="btn" id="calc">计算并设计喷管</button><button class="btn secondary" id="reset">恢复示例参数</button>
+<p class="hint" id="modelHint">模型假设：定比热理想气体、绝热、可逆、稳态、一维流动；忽略摩擦、位能变化及边界层影响。初始状态视为喷管入口静态状态。</p><p class="hint">水蒸气性质库：XSteam2（基于 IAPWS-IF97）。<a href="https://github.com/kpatvt/xsteam2" target="_blank" rel="noopener">代码来源</a> · <a href="https://iapws.org/technical-guidance/release/IF97-Rev" target="_blank" rel="noopener">IAPWS-IF97 标准</a></p></aside>
+<main class="main">
+<section class="card"><h2>计算状态 <span id="flowTag" class="tag">等待计算</span></h2><div id="status" class="status">输入参数后点击“计算并设计喷管”。</div><div class="metrics" id="metrics" style="margin-top:14px"></div></section>
+<section class="card"><h2>喷管结构轮廓（示意比例）</h2><div class="svgwrap" id="drawing"><svg viewBox="0 0 800 260" role="img" aria-label="等待计算的喷管轮廓"><text x="400" y="130" text-anchor="middle" fill="#65748b">计算后显示喷管轮廓</text></svg></div><div class="foot">图形为轴对称喷管的二维剖面示意，长度与半径按设计参数归一化显示；不代表机械加工图纸。</div></section>
+<div class="two"><section class="card"><h2>关键设计尺寸</h2><table class="table" id="dimensions"></table></section><section class="card"><h2>出口流动参数</h2><table class="table" id="outlet"></table></section></div>
+<section class="card" id="frictionCard" style="display:none"><h2>摩擦损失与效率修正 <span id="fricTag" class="badge">有摩擦</span></h2><p class="hint" id="fricHint"></p><table class="compare" id="frictionTable"></table></section>
+<section class="card" style="display:none"><h2>计算过程摘要</h2><p class="hint">下方显示本次计算的关键公式与数值。完整推导、公式说明及模型适用条件请打开 <a href="theory.html">计算过程与理论依据专题页</a>。</p><div id="steps"><p class="hint">计算后显示滞止参数、临界条件、面积及速度关系。</p></div></section>
+<!-- <section class="card"><h2>模型适用范围与工程提醒</h2><ul><li>当背压低于临界压力时，采用阻塞流及超声速扩张段设计，理想膨胀出口压力取背压。</li><li>当背压高于临界压力时，按亚声速流动计算出口状态；此时不需要超声速扩张段。</li><li>若背压低于设计出口压力，实际喷管可能过度膨胀并出现激波；本网页不求解激波位置。</li><li>真实设计还需校核强度、热负荷、边界层、流动分离、加工公差及材料限制。</li></ul></section> -->
+</main></div>
+</div>
+<script src="https://cdn.jsdelivr.net/gh/kpatvt/xsteam2@master/xsteam2.js"></script>
+<script>
+const gases={N2:{name:'氮气 N₂',R:296.8,g:1.4,cp:1039},air:{name:'空气',R:287.05,g:1.4,cp:1004.5},Ar:{name:'氩气 Ar',R:208.13,g:1.667,cp:520.3},H2:{name:'氢气 H₂',R:4124,g:1.405,cp:14300},CO2:{name:'二氧化碳 CO₂',R:188.9,g:1.289,cp:846},He:{name:'氦气 He',R:2077.1,g:1.667,cp:5193}};
+const $=id=>document.getElementById(id), fmt=(x)=>Number.isFinite(x)?new Intl.NumberFormat('zh-CN',{maximumSignificantDigits:4,minimumSignificantDigits:4}).format(x):'—';
+function solveMFromPR(pr,g,branch){ // p/p0=(1+(g-1)M²/2)^(-g/(g-1))
+ let lo=branch==='sup'?1:0, hi=branch==='sup'?30:1;
+ for(let i=0;i<100;i++){let m=(lo+hi)/2, val=Math.pow(1+(g-1)*m*m/2,-g/(g-1)); if(branch==='sup'){if(val>pr)lo=m;else hi=m}else{if(val>pr)lo=m;else hi=m}}
+ return (lo+hi)/2;
+}
+function areaMach(M,g){return (1/M)*Math.pow((2/(g+1))*(1+(g-1)*M*M/2),(g+1)/(2*(g-1)));}
+function massFlux(p0,T0,M,g,R){return p0/Math.sqrt(T0)*Math.sqrt(g/R)*M*Math.pow(1+(g-1)*M*M/2,-(g+1)/(2*(g-1)));}
+function draw(throatD,exitD,mode){
+  const cy=130,x0=150,xSpan=500;
+  const scale=55/Math.max(throatD/2,exitD/2,0.001);
+  const rt=throatD/2*scale,re=exitD/2*scale;
+  const throatX=x0+xSpan*.45,exitX=x0+xSpan;
+  let ptsTop=[],ptsBot=[];
+  for(let i=0;i<=100;i++){
+    let u=i/100,x=x0+xSpan*u,r;
+    if(mode==='CD'){
+      if(u<.45){
+        let q=u/.45;
+        r=Math.pow(1-q,2)*Math.max(rt*1.9,rt+8)+2*q*(1-q)*rt+q*q*rt;
+      }else{
+        let q=(u-.45)/.55;
+        r=rt+(re-rt)*(0.5-0.5*Math.cos(Math.PI*q));
+      }
+    }else{
+      const rin=Math.max(rt*1.9,rt+8);
+      r=rin+(rt-rin)*u;
+    }
+    ptsTop.push(`${x.toFixed(1)},${(cy-r).toFixed(1)}`);
+    ptsBot.unshift(`${x.toFixed(1)},${(cy+r).toFixed(1)}`);
+  }
+  const path='M'+ptsTop.join(' L')+' L'+ptsBot.join(' L')+' Z';
+  const throatGuide=mode==='CD'
+    ?`<line x1="${throatX}" y1="28" x2="${throatX}" y2="232" stroke="#f59e0b" stroke-dasharray="4 4"/><text x="${throatX}" y="22" text-anchor="middle" fill="#a16207" font-size="13">喉部</text>`
+    :'';
+  const minX=mode==='CD'?throatX:exitX;
+  const minLabel=`最小直径 ${fmt(throatD*1000)} mm`;
+  const labelX=mode==='CD'?minX+12:minX-10;
+  const labelAnchor=mode==='CD'?'start':'end';
+  const labelY=Math.max(42,cy-rt-14);
+  $('drawing').innerHTML=`<svg viewBox="0 0 800 260" role="img" aria-label="喷管剖面轮廓"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#93c5fd" stop-opacity=".5"/><stop offset="1" stop-color="#dbeafe" stop-opacity=".8"/></linearGradient></defs><path d="${path}" fill="url(#fill)" stroke="#2563eb" stroke-width="3"/><line x1="125" y1="130" x2="675" y2="130" stroke="#94a3b8" stroke-dasharray="6 5"/>${throatGuide}<text x="${x0}" y="22" fill="#475569" font-size="13">入口</text><text x="${exitX}" y="22" text-anchor="end" fill="#475569" font-size="13">出口</text><text x="400" y="252" text-anchor="middle" fill="#64748b" font-size="12">轴向 x（示意）</text><text x="${labelX}" y="${labelY.toFixed(1)}" text-anchor="${labelAnchor}" fill="#a16207" font-size="12">${minLabel}</text></svg>`;
+}
+function rowTable(id,rows){$(id).innerHTML='<tr><th>参数</th><th>数值</th></tr>'+rows.map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join('')}
+function readFriction(){
+  const on=$('fricOn').checked;
+  let phi=+$('phi').value, eta=+$('eta').value;
+  if(!Number.isFinite(phi)||phi<=0||phi>1) throw Error('速度系数 φ 须在 0～1 之间。');
+  if(!Number.isFinite(eta)||eta<=0||eta>1) throw Error('喷管效率 ηₙ 须在 0～1 之间。');
+  return {on,phi,eta};
+}
+function renderFriction(on,hint,rows){
+  const card=$('frictionCard');
+  if(!on){card.style.display='none';return;}
+  card.style.display='';
+  $('fricTag').textContent='有摩擦 · 实际状态';
+  $('fricHint').textContent=hint;
+  let html='<tr><th>参数</th><th class="col-ideal">等熵（无摩擦）</th><th class="col-actual">实际（考虑摩擦）</th></tr>';
+  html+=rows.map(r=>`<tr><td>${r[0]}</td><td class="num col-ideal">${r[1]}</td><td class="num col-actual">${r[2]}</td></tr>`).join('');
+  $('frictionTable').innerHTML=html;
+}
+
+function steamStateAtPressure(pMPa,h0,s0){
+ const X=xsteam2;
+ const h=X.h_ps(pMPa,s0),v=X.v_ps(pMPa,s0),T=X.T_ps(pMPa,s0);
+ if(![h,v,T].every(Number.isFinite)||v<=0) return null;
+ const dh=h0-h;
+ if(dh < -1e-5) return null;
+ const c=Math.sqrt(Math.max(0,2*1000*dh));
+ const xRaw=X.x_ps(pMPa,s0);
+ const quality=Number.isFinite(xRaw)&&xRaw>=0&&xRaw<=1?xRaw:null;
+ return {p:pMPa,h,v,T,c,G:c/v,quality};
+}
+function calculateSteam(){
+ if(typeof xsteam2==='undefined') throw Error('水蒸气 IF97 性质库未能加载。请检查网络连接后刷新网页。');
+ const X=xsteam2;
+ const p1=+$('p').value/1000, T1=+$('t').value, c1=+$('v').value;
+ const mdot=+$('mdot').value, pb=+$('pb').value/1000;
+ if(![p1,T1,c1,mdot,pb].every(Number.isFinite)||p1<=0||T1<273.15||c1<0||mdot<=0||pb<=0)
+   throw Error('水蒸气工况输入无效：压力、质量流量须为正，温度不得低于 273.15 K，速度不得为负。');
+ if(p1>100||pb>100) throw Error('IAPWS-IF97 当前实现的压力适用上限为 100 MPa。');
+ if(T1>2273.15||(T1>1073.15&&p1>50)) throw Error('入口状态超出 IAPWS-IF97 温压适用范围：T 不得超过 2273.15 K；T 高于 1073.15 K 时压力不得超过 50 MPa。');
+ if(p1>=22.06395 && T1<647.096) {
+   // Supercritical pressure: no liquid-vapor saturation boundary.
+ } else if(p1<22.06395 && T1<647.096) {
+   const Ts=X.Tsat_p(p1);
+   if(!Number.isFinite(Ts)) throw Error('无法确定入口饱和温度，请检查压力范围。');
+   if(T1<Ts-0.08) throw Error(`当前入口状态为过冷水而非水蒸气。该压力下饱和温度约为 ${fmt(Ts)} K，请提高入口温度。`);
+ }
+ let h1,s1,v1;
+ const Ts1=(p1<22.06395 && T1<647.096)?X.Tsat_p(p1):NaN;
+ if(Number.isFinite(Ts1)&&Math.abs(T1-Ts1)<=0.08){
+   h1=X.hV_p(p1); s1=X.sV_p(p1); v1=X.vV_p(p1);
+ }else{
+   h1=X.h_pT(p1,T1); s1=X.s_pT(p1,T1); v1=X.v_pT(p1,T1);
+ }
+ if(![h1,s1,v1].every(Number.isFinite)||v1<=0)
+   throw Error('入口状态超出当前 IF97 计算范围，或无法识别为稳定水蒸气状态。');
+ const h0=h1+c1*c1/2000;
+ const p0=X.p_hs(h0,s1);
+ const T0=X.T_ph(p0,h0);
+ if(!Number.isFinite(p0)||!Number.isFinite(T0)||p0<=p1||p0>100)
+   throw Error('无法求得有效滞止状态，请检查入口压力、温度和速度。');
+ if(pb>=p0) throw Error('背压必须低于入口滞止压力，当前工况没有正向膨胀压差。');
+ const pMin=0.0006116571;
+ const logMin=Math.log(pMin),logMax=Math.log(p0*0.999999);
+ let bestI=-1,bestG=-Infinity,grid=[];
+ const N=260;
+ for(let i=0;i<=N;i++){
+   const lp=logMin+(logMax-logMin)*i/N;
+   const st=steamStateAtPressure(Math.exp(lp),h0,s1);
+   grid.push(st);
+   if(st&&Number.isFinite(st.G)&&st.G>bestG){bestG=st.G;bestI=i;}
+ }
+ if(bestI<1||bestI>=N) throw Error('未能在 IF97 有效范围内定位临界质量流率，请调整入口工况。');
+ // Refine the maximum mass flux in log-pressure space (golden-section search).
+ let a=logMin+(logMax-logMin)*(bestI-1)/N;
+ let b=logMin+(logMax-logMin)*(bestI+1)/N;
+ const objective=lp=>{
+   const st=steamStateAtPressure(Math.exp(lp),h0,s1);
+   return st&&Number.isFinite(st.G)?st.G:-Infinity;
+ };
+ const phi=(Math.sqrt(5)-1)/2;
+ let c=b-phi*(b-a),d=a+phi*(b-a),fc=objective(c),fd=objective(d);
+ for(let i=0;i<90;i++){
+   if(fc>fd){b=d;d=c;fd=fc;c=b-phi*(b-a);fc=objective(c);}
+   else{a=c;c=d;fc=fd;d=a+phi*(b-a);fd=objective(d);}
+ }
+ const pCrit=Math.exp((a+b)/2);
+ const throat=steamStateAtPressure(pCrit,h0,s1);
+ if(!throat||!Number.isFinite(throat.G)||throat.G<=0) throw Error('临界状态求解失败。');
+ const choked=pb<=pCrit;
+ const exit=steamStateAtPressure(pb,h0,s1);
+ if(!exit||!Number.isFinite(exit.G)||exit.G<=0) throw Error('背压对应的出口状态超出 IF97 有效范围。');
+ const fr=readFriction();
+ const vp=fr.on?fr.phi:1, eta=vp*vp;
+ const Ae_s=mdot/exit.G;
+ let At=choked?mdot/throat.G:Ae_s;
+ let hE=exit.h,vE=exit.v,TE=exit.T,cE=exit.c,sE=s1,qualityE=exit.quality,aE=X.w_ps(pb,s1);
+ let Me=Number.isFinite(aE)&&aE>0?exit.c/aE:NaN, dhLoss=0, dsLoss=0;
+ if(fr.on){
+   cE=vp*exit.c;
+   hE=h0-cE*cE/2000;
+   if(!(hE<h0-1e-6)||hE<exit.h-1e-6) throw Error('摩擦修正后的出口焓超出合理范围，请检查速度系数 φ。');
+   vE=X.v_ph(pb,hE); TE=X.T_ph(pb,hE); sE=X.s_ph(pb,hE);
+   const xR=X.x_ph(pb,hE);
+   qualityE=Number.isFinite(xR)&&xR>=0&&xR<=1?xR:null;
+   if(![vE,TE,sE].every(Number.isFinite)||vE<=0) throw Error('摩擦修正后的出口状态超出 IF97 有效范围，建议减小摩擦损失（提高 φ）。');
+   aE=typeof X.w_ph==='function'?X.w_ph(pb,hE):NaN;
+   Me=Number.isFinite(aE)&&aE>0?cE/aE:NaN;
+   dhLoss=hE-exit.h; dsLoss=sE-s1;
+ }
+ const Ae=mdot/(cE/vE);
+ if(!choked) At=Ae;
+ const dt=Math.sqrt(4*At/Math.PI),de=Math.sqrt(4*Ae/Math.PI);
+ const rhoE=1/vE;
+ const pc=pCrit*1000;
+ const phase=qualityE===null?'过热蒸汽':(qualityE>=0.9999?'干饱和蒸汽':`湿蒸汽（干度 ${fmt(qualityE)}）`);
+ $('flowTag').textContent=choked?'阻塞流 · IF97':'未阻塞 · IF97';
+ $('flowTag').style.background=choked?'#e9f7f1':'#fff4db';
+ $('flowTag').style.color=choked?'#087f5b':'#a16207';
+ $('status').className='status'+(!choked?' warn':'');
+ const fricNoteS=fr.on?` 已按速度系数 φ = ${fmt(vp)}、喷管效率 ηₙ = ${fmt(eta)} 计入摩擦损失。`:' 本次按等熵（无摩擦）计算。';
+ $('status').textContent=`采用 IAPWS-IF97 真实水蒸气性质。临界压力 p* = ${fmt(pc)} kPa；背压 ${fmt(pb*1000)} kPa ${choked?'低于临界压力，喉部达到最大质量流率，按缩放喷管设计。':'高于临界压力，流动未阻塞，按渐缩喷管设计。'}${fricNoteS} 实际出口状态：${phase}。`;
+ const metrics=[
+  ['滞止压力 p₀',fmt(p0*1000)+' kPa'],['滞止温度 T₀',fmt(T0)+' K'],
+  ['出口速度 cₑ',fmt(cE)+' m/s'],['出口马赫数 Maₑ',fmt(Me)],
+  ['喉部直径 dₜ',fmt(dt*1000)+' mm'],['出口直径 dₑ',fmt(de*1000)+' mm'],
+  ['出口温度 Tₑ',fmt(TE)+' K'],['出口密度 ρₑ',fmt(rhoE)+' kg/m³']
+ ];
+ $('metrics').innerHTML=metrics.map(x=>`<div class="metric"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join('');
+ draw(dt,de,choked?'CD':'C');
+ rowTable('dimensions',[
+  ['工质','水蒸气 H₂O（IAPWS-IF97）'],['入口比焓 h₁',fmt(h1)+' kJ/kg'],
+  ['滞止比焓 h₀',fmt(h0)+' kJ/kg'],['滞止熵 s₀',fmt(s1)+' kJ/(kg·K)'],
+  ['临界压力 p*',fmt(pc)+' kPa'],['临界质量通量 G*',fmt(throat.G)+' kg/(m²·s)'],
+  ['喉部面积 Aₜ',fmt(At*1e6)+' mm²'],['喉部直径 dₜ',fmt(dt*1000)+' mm'],
+  ['出口面积 Aₑ（实际）',fmt(Ae*1e6)+' mm²'],['出口直径 dₑ（实际）',fmt(de*1000)+' mm'],
+  ['出口/喉部面积比',fmt(Ae/At)],['喷管类型',choked?'缩放喷管':'渐缩喷管']
+ ]);
+ rowTable('outlet',[
+  ['出口压力 pₑ',fmt(pb*1000)+' kPa'],['出口温度 Tₑ',fmt(TE)+' K'],
+  ['出口比焓 hₑ',fmt(hE)+' kJ/kg'],['出口熵 sₑ',fmt(sE)+' kJ/(kg·K)'],
+  ['出口速度 cₑ',fmt(cE)+' m/s'],['出口声速 aₑ',fmt(aE)+' m/s'],
+  ['出口马赫数 Maₑ',fmt(Me)],['出口密度 ρₑ',fmt(rhoE)+' kg/m³'],
+  ['出口状态',phase],['出口干度 x',qualityE===null?'—（单相蒸汽）':fmt(qualityE)],
+  ['出口体积流量',fmt(mdot/rhoE)+' m³/s']
+ ]);
+ renderFriction(fr.on,
+  '以等熵出口状态为基准，摩擦使部分可用焓降重新转化为出口焓增：实际速度降低、出口焓与温度升高、比体积增大，因而所需出口面积增大；出口压力仍取背压。喉部临界截面积按等熵临界流量工程近似估算。',
+  [
+   ['速度系数 φ','1（理想）',fmt(vp)],
+   ['喷管效率 ηₙ','1（理想）',fmt(eta)],
+   ['出口速度 cₑ',fmt(exit.c)+' m/s',fmt(cE)+' m/s'],
+   ['出口比焓 hₑ',fmt(exit.h)+' kJ/kg',fmt(hE)+' kJ/kg'],
+   ['出口温度 Tₑ',fmt(exit.T)+' K',fmt(TE)+' K'],
+   ['出口比体积 vₑ',fmt(exit.v)+' m³/kg',fmt(vE)+' m³/kg'],
+   ['出口密度 ρₑ',fmt(1/exit.v)+' kg/m³',fmt(rhoE)+' kg/m³'],
+   ['出口面积 Aₑ',fmt(Ae_s*1e6)+' mm²',fmt(Ae*1e6)+' mm²'],
+   ['出口干度 x',exit.quality===null?'单相':fmt(exit.quality),qualityE===null?'单相':fmt(qualityE)],
+   ['摩擦焓损失 Δh_loss','0 kJ/kg',fmt(dhLoss)+' kJ/kg'],
+   ['出口熵增 Δs','0 kJ/(kg·K)',fmt(dsLoss)+' kJ/(kg·K)']
+  ]);
+ $('steps').innerHTML=
+  `<div class="eq">性质模型：IAPWS-IF97；p₁ = ${fmt(p1)} MPa，T₁ = ${fmt(T1)} K，c₁ = ${fmt(c1)} m/s</div>`+
+  `<p><b>1. 入口状态与滞止焓</b></p><div class="eq">h₁ = ${fmt(h1)} kJ/kg；s₁ = ${fmt(s1)} kJ/(kg·K)；v₁ = ${fmt(v1)} m³/kg</div>`+
+  `<div class="eq">h₀ = h₁ + c₁²/2 = ${fmt(h0)} kJ/kg；绝热可逆减速时 s₀ = s₁</div>`+
+  `<div class="eq">由 IF97 反算 p₀ = p(h₀,s₀) = ${fmt(p0)} MPa；T₀ = ${fmt(T0)} K</div>`+
+  `<p><b>2. 等熵膨胀与临界状态</b></p><div class="eq">沿 s = s₀ 计算 h(p,s₀)、v(p,s₀)，局部速度 c(p) = √[2×1000×(h₀−h)]</div>`+
+  `<div class="eq">质量通量 G(p) = ρc = c/v；最大值 G* = ${fmt(throat.G)} kg/(m²·s)，对应 p* = ${fmt(pc)} kPa</div>`+
+  `<p><b>3. 喉部与出口面积</b></p><div class="eq">Aₜ = ṁ/G* = ${fmt(At*1e6)} mm²；Aₑ（实际）= ṁvₑ/cₑ = ${fmt(Ae*1e6)} mm²</div>`+
+  `<p><b>4. 出口相态</b></p><div class="eq">出口干度 xₑ = ${qualityE===null?'单相蒸汽':fmt(qualityE)}；实际出口状态：${phase}</div>`+
+  (fr.on?`<p><b>5. 摩擦与效率修正</b></p><div class="eq">cₑ = φ·cₑ,ₛ = ${fmt(vp)}×${fmt(exit.c)} = ${fmt(cE)} m/s；ηₙ = φ² = ${fmt(eta)}</div><div class="eq">hₑ = h₀ − cₑ²/2000 = ${fmt(hE)} kJ/kg；摩擦焓损失 Δh_loss = hₑ − hₑ,ₛ = ${fmt(dhLoss)} kJ/kg</div><div class="eq">由 IF97 反算 (pₑ, hₑ) 得 Tₑ = ${fmt(TE)} K，vₑ = ${fmt(vE)} m³/kg，sₑ = ${fmt(sE)} kJ/(kg·K)</div>`:'')+
+  `<p class="hint">说明：临界状态通过等熵线上质量通量最大值数值搜索确定。湿蒸汽区采用 IF97 均相平衡近似（HEM）；摩擦按出口速度系数 φ（喷管效率 ηₙ=φ²）作集中损失修正，未含非平衡凝结、液滴粒径、激波及沿程边界层发展模型。</p>`;
+}
+
+function calculate(){try{
+ if($('gas').value==='steam'){calculateSteam();return;}
+ const gas=gases[$('gas').value],p=+$('p').value*1000,T=+$('t').value,v=+$('v').value,md=+$('mdot').value,pb=+$('pb').value*1000,g=gas.g,R=gas.R,cp=gas.cp;
+ if(![p,T,v,md,pb].every(Number.isFinite)||p<=0||T<=0||v<0||md<=0||pb<=0)throw Error('请检查输入：压力、温度、流量必须为正数，速度不能为负数。');
+ const T0=T+v*v/(2*cp),p0=p*Math.pow(T0/T,g/(g-1)),crit=Math.pow(2/(g+1),g/(g-1)),pc=p0*crit,pr=pb/p0;
+ let choked=pr<=crit,pe=pb,Me_s,Te_s,ce_s,At,Ae_s,mode;
+ if(choked){Me_s=solveMFromPR(Math.max(pr,1e-12),g,'sup');Te_s=T0/(1+(g-1)*Me_s*Me_s/2);ce_s=Me_s*Math.sqrt(g*R*Te_s);const Gstar=massFlux(p0,T0,1,g,R);At=md/Gstar;Ae_s=md/massFlux(p0,T0,Me_s,g,R);mode='CD';}
+ else{Me_s=solveMFromPR(pr,g,'sub');Te_s=T0/(1+(g-1)*Me_s*Me_s/2);ce_s=Me_s*Math.sqrt(g*R*Te_s);Ae_s=md/massFlux(p0,T0,Me_s,g,R);At=Ae_s;mode='C';}
+ const fr=readFriction();
+ const phi=fr.on?fr.phi:1,eta=phi*phi;
+ const dh_s=cp*(T0-Te_s),rho_s=pe/(R*Te_s);
+ let Me=Me_s,Te=Te_s,ce=ce_s,Ae=Ae_s,rhoE=rho_s,aE=Math.sqrt(g*R*Te_s),dhLoss=0,dsLoss=0;
+ if(fr.on){
+   ce=phi*ce_s;
+   const dh=eta*dh_s;
+   Te=T0-dh/cp;
+   if(!(Te>0)) throw Error('摩擦修正后出口温度非正，请提高速度系数 φ。');
+   rhoE=pe/(R*Te);aE=Math.sqrt(g*R*Te);Me=ce/aE;Ae=md/(rhoE*ce);
+   dhLoss=(1-eta)*dh_s;dsLoss=cp*Math.log(Te/Te_s);
+ }
+ if(!choked) At=Ae;
+ const dt=Math.sqrt(4*At/Math.PI),de=Math.sqrt(4*Ae/Math.PI),rho0=p0/(R*T0),m1=v/Math.sqrt(g*R*T),mstar=1;
+ $('flowTag').textContent=choked?'阻塞流 · 超声速设计':'未阻塞 · 亚声速设计';$('flowTag').style.background=choked?'#e9f7f1':'#fff4db';$('flowTag').style.color=choked?'#087f5b':'#a16207';
+ const fricNote=fr.on?`已按 φ = ${fmt(phi)}、ηₙ = ${fmt(eta)} 计入摩擦损失。`:'本次按等熵（无摩擦）计算。';
+ $('status').className='status'+(!choked?' warn':'');
+ $('status').textContent=choked?`背压比 p_b/p₀ = ${fmt(pr)}，低于临界压力比 ${fmt(crit)}，喉部达到 Ma = 1，采用缩放喷管设计。${fricNote}`:`背压比 p_b/p₀ = ${fmt(pr)}，高于临界压力比 ${fmt(crit)}，流动未阻塞，按亚声速渐缩喷管计算；此工况不能形成稳定的设计超声速扩张段。${fricNote}`;
+ const metrics=[['滞止压力 p₀',fmt(p0/1000)+' kPa'],['滞止温度 T₀',fmt(T0)+' K'],['出口速度 cₑ',fmt(ce)+' m/s'],['出口马赫数 Maₑ',fmt(Me)],['喉部直径 dₜ',fmt(dt*1000)+' mm'],['出口直径 dₑ',fmt(de*1000)+' mm'],['出口温度 Tₑ',fmt(Te)+' K'],['出口密度 ρₑ',fmt(rhoE)+' kg/m³']];$('metrics').innerHTML=metrics.map(x=>`<div class="metric"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join('');
+ draw(dt,de,mode);
+ rowTable('dimensions',[['工质',gas.name],['喉部面积 Aₜ',fmt(At*1e6)+' mm²'],['喉部直径 dₜ',fmt(dt*1000)+' mm'],['出口面积 Aₑ（实际）',fmt(Ae*1e6)+' mm²'],['出口直径 dₑ（实际）',fmt(de*1000)+' mm'],['出口/喉部面积比',fmt(Ae/At)],['喷管类型',choked?'缩放喷管':'渐缩喷管']]);
+ rowTable('outlet',[['出口压力 pₑ',fmt(pe/1000)+' kPa'],['出口温度 Tₑ',fmt(Te)+' K'],['出口速度 cₑ',fmt(ce)+' m/s'],['出口马赫数 Maₑ',fmt(Me)],['出口声速 aₑ',fmt(aE)+' m/s'],['出口密度 ρₑ',fmt(rhoE)+' kg/m³'],['实际焓降 Δh',fmt(eta*dh_s/1000)+' kJ/kg'],['出口体积流量',fmt(md/rhoE)+' m³/s']]);
+ renderFriction(fr.on,
+  '以等熵膨胀到背压的出口状态为基准：摩擦耗散使部分可用焓降转化为出口焓增，实际速度 cₑ=φ·cₑ,ₛ，出口温度与比体积升高、密度下降，连续方程给出的出口面积相应增大；出口压力仍取背压。喉部临界截面积按等熵临界流量工程近似估算。',
+  [
+   ['速度系数 φ','1（理想）',fmt(phi)],
+   ['喷管效率 ηₙ','1（理想）',fmt(eta)],
+   ['出口速度 cₑ',fmt(ce_s)+' m/s',fmt(ce)+' m/s'],
+   ['出口温度 Tₑ',fmt(Te_s)+' K',fmt(Te)+' K'],
+   ['出口马赫数 Maₑ',fmt(Me_s),fmt(Me)],
+   ['出口密度 ρₑ',fmt(rho_s)+' kg/m³',fmt(rhoE)+' kg/m³'],
+   ['出口面积 Aₑ',fmt(Ae_s*1e6)+' mm²',fmt(Ae*1e6)+' mm²'],
+   ['等熵焓降 Δhₛ',fmt(dh_s/1000)+' kJ/kg',fmt(dh_s/1000)+' kJ/kg'],
+   ['实际焓降 Δh',fmt(dh_s/1000)+' kJ/kg',fmt(eta*dh_s/1000)+' kJ/kg'],
+   ['摩擦焓损失 Δh_loss','0 kJ/kg',fmt(dhLoss/1000)+' kJ/kg'],
+   ['出口熵增 Δs','0 kJ/(kg·K)',fmt(dsLoss/1000)+' kJ/(kg·K)']
+  ]);
+ $('steps').innerHTML=
+ `<div class="eq">R = ${fmt(gas.R)} J/(kg·K)，γ = ${fmt(g)}，cₚ = ${fmt(cp)} J/(kg·K)</div>`+
+ `<p><b>1. 入口滞止状态</b></p><div class="eq">T₀ = T₁ + c₁²/(2cₚ) = ${fmt(T0)} K</div><div class="eq">p₀ = p₁ (T₀/T₁)^[γ/(γ−1)] = ${fmt(p0/1000)} kPa</div>`+
+ `<p><b>2. 临界压力判断</b></p><div class="eq">(p*/p₀) = [2/(γ+1)]^[γ/(γ−1)] = ${fmt(crit)}；p* = ${fmt(pc/1000)} kPa</div>`+
+ `<p><b>3. 等熵出口马赫数与状态</b></p><div class="eq">pₑ/p₀ = [1+(γ−1)Maₑ,ₛ²/2]^[-γ/(γ−1)]</div><div class="eq">Maₑ,ₛ = ${fmt(Me_s)}；Tₑ,ₛ = T₀/[1+(γ−1)Maₑ,ₛ²/2] = ${fmt(Te_s)} K</div><div class="eq">cₑ,ₛ = Maₑ,ₛ√(γRTₑ,ₛ) = ${fmt(ce_s)} m/s</div>`+
+ `<p><b>4. 连续方程与面积</b></p><div class="eq">ṁ/A = ρc；Aₜ = ${fmt(At*1e6)} mm²；Aₑ（实际）= ṁ/(ρₑcₑ) = ${fmt(Ae*1e6)} mm²</div>`+
+ (fr.on?`<p><b>5. 摩擦与效率修正</b></p><div class="eq">cₑ = φ·cₑ,ₛ = ${fmt(phi)}×${fmt(ce_s)} = ${fmt(ce)} m/s；ηₙ = φ² = ${fmt(eta)}</div><div class="eq">Δhₛ = cₚ(T₀−Tₑ,ₛ) = ${fmt(dh_s/1000)} kJ/kg；实际焓降 Δh = ηₙΔhₛ = ${fmt(eta*dh_s/1000)} kJ/kg</div><div class="eq">Tₑ = T₀ − Δh/cₚ = ${fmt(Te)} K；摩擦焓损失 Δh_loss = (1−ηₙ)Δhₛ = ${fmt(dhLoss/1000)} kJ/kg</div><div class="eq">出口熵增 Δs = cₚ ln(Tₑ/Tₑ,ₛ)（pₑ 不变）= ${fmt(dsLoss/1000)} kJ/(kg·K)</div>`:'')+
+ `<p><b>${fr.on?'6':'5'}. 初始速度影响</b>：初始速度通过入口动能项影响滞止温度与滞止压力，进而影响临界流量、喉部面积和出口状态。</p>`;
+ }catch(e){$('status').className='status warn';$('status').textContent=e.message;}}
+function updateModelHint(){
+ const isSteam=$('gas').value==='steam';
+ $('modelHint').textContent=isSteam
+  ?'水蒸气采用 IAPWS-IF97 真实工质性质；默认按绝热等熵膨胀计算，可在下方启用摩擦修正（速度系数 φ、喷管效率 ηₙ）。湿蒸汽区为均相平衡近似；未含非平衡凝结、液滴粒径及激波模型。压力单位 kPa，温度单位 K。'
+  :'模型假设：定比热理想气体、绝热、稳态、一维流动；基准过程为可逆等熵，可在下方启用摩擦修正（速度系数 φ、喷管效率 ηₙ=φ²）。忽略位能变化及边界层发展，初始状态视为喷管入口静态状态。';
+}
+$('gas').addEventListener('change',()=>{
+ if($('gas').value==='steam' && +$('t').value<500) $('t').value=773.15;
+ updateModelHint();
+});
+const syncPhiEta=(src)=>{
+ if(src==='phi'){const ph=+$('phi').value;if(Number.isFinite(ph)&&ph>0&&ph<=1)$('eta').value=(ph*ph).toFixed(4);}
+ else{const et=+$('eta').value;if(Number.isFinite(et)&&et>0&&et<=1)$('phi').value=Math.sqrt(et).toFixed(4);}
+};
+$('phi').addEventListener('input',()=>syncPhiEta('phi'));
+$('eta').addEventListener('input',()=>syncPhiEta('eta'));
+$('fricOn').addEventListener('change',()=>{const dis=!$('fricOn').checked;$('phi').disabled=dis;$('eta').disabled=dis;});
+$('calc').addEventListener('click',calculate);
+$('reset').addEventListener('click',()=>{
+ $('gas').value='N2';$('p').value=1000;$('t').value=300;$('v').value=50;$('mdot').value=1;$('pb').value=100;
+ $('fricOn').checked=true;$('phi').value=0.95;$('eta').value=0.9025;$('phi').disabled=false;$('eta').disabled=false;
+ updateModelHint();calculate();
+});
+updateModelHint();calculate();
+</script></body></html>
