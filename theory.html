@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工程热力学｜喷管计算过程与理论依据</title>
+<style>
+:root{--bg:#f3f6fb;--panel:#fff;--ink:#17243a;--muted:#65748b;--blue:#2563eb;--line:#dce4ef;--green:#087f5b;--amber:#a16207}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 system-ui,"Microsoft YaHei",sans-serif}.wrap{max-width:1000px;margin:auto;padding:28px 18px 56px}.hero{background:linear-gradient(120deg,#10284c,#1d4e89);color:#fff;padding:28px;border-radius:18px;margin-bottom:18px}.hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,34px)}.hero p{margin:0;color:#d8e7fa}.nav{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}.nav a{color:#1d4ed8;text-decoration:none;font-weight:700;background:#eaf1ff;padding:8px 13px;border-radius:9px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:22px;margin:16px 0;box-shadow:0 5px 18px #19365a0a}.card h2{font-size:20px;margin:0 0 12px}.card h3{font-size:16px;margin:20px 0 8px}.eq{background:#f7f9fc;border-left:3px solid var(--blue);padding:11px 14px;margin:10px 0;border-radius:5px;font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere}.note{background:#fff7e6;border-left:3px solid #d97706;padding:12px 14px;border-radius:6px}.muted{color:var(--muted)}table{width:100%;border-collapse:collapse;margin:10px 0}td,th{padding:9px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted)}.foot{font-size:12px;color:var(--muted);margin-top:20px}@media(max-width:650px){.card{padding:16px}table{font-size:13px}}
+</style>
+</head><body><div class="wrap">
+<header class="hero"><h1>喷管计算过程与理论依据</h1><p>一维稳态理想气体流动 · 等熵关系 · 临界流动 · 面积设计</p></header>
+<nav class="nav"><a href="index.html">← 返回喷管设计计算</a><a href="#model">模型假设</a><a href="#derivation">计算推导</a><a href="#types">喷管类型</a><a href="#limits">适用范围</a></nav>
+<section class="card" id="model"><h2>一、模型与基本假设</h2><p>本网页采用一维、稳态、绝热且可逆的理想气体流动模型。工质使用定比热近似，入口给定的压力、温度和速度视为入口静态参数。忽略喷管内摩擦、热交换、位能变化、边界层厚度及非均匀流动。</p><p>输入参数包括工质气体常数 <b>R</b>、比热比 <b>γ</b>、定压比热 <b>cₚ</b>，以及入口压力 <b>p₁</b>、温度 <b>T₁</b>、速度 <b>c₁</b>、质量流量 <b>ṁ</b> 和背压 <b>p_b</b>。</p><div class="note">压力必须使用绝对压力。当前版本为教学与初步方案设计工具，气体物性采用常温近似值，不适用于高温真实气体、化学反应流或强非平衡流动。</div></section>
+<section class="card" id="derivation"><h2>二、计算过程与公式推导</h2>
+<h3>1. 入口滞止参数</h3><p>由稳流能量方程，在绝热且忽略位能变化时，静焓与动能之和保持不变。对定比热理想气体：</p><div class="eq">h₀ = h₁ + c₁²/2　⇒　T₀ = T₁ + c₁²/(2cₚ)</div><p>入口静态状态与滞止状态满足等熵关系：</p><div class="eq">p₀/p₁ = (T₀/T₁)^[γ/(γ−1)]</div><p>其中 T₀ 为滞止温度，p₀ 为滞止压力。滞止状态表示流体等熵减速至零速度时的状态。</p>
+<h3>2. 临界压力比与阻塞判定</h3><p>喷管喉部达到声速 Ma = 1 时，质量流率达到给定滞止状态下的最大值。临界静压与滞止压力之比为：</p><div class="eq">p*/p₀ = [2/(γ+1)]^[γ/(γ−1)]</div><p>因此比较背压比 p_b/p₀ 与临界压力比：</p><ul><li>若 p_b/p₀ ≤ p*/p₀，按阻塞流处理，喉部 Ma = 1；若背压更低，理想出口可达到超声速。</li><li>若 p_b/p₀ ＞ p*/p₀，流动未阻塞，按亚声速渐缩喷管计算。</li></ul>
+<h3>3. 出口马赫数、温度与速度</h3><p>对于等熵理想气体，任意截面的静压与滞止压力关系为：</p><div class="eq">p/p₀ = [1 + (γ−1)Ma²/2]^[-γ/(γ−1)]</div><p>给定出口压力后，通过数值求解该式得到出口马赫数 Maₑ。出口温度为：</p><div class="eq">Tₑ = T₀ / [1 + (γ−1)Maₑ²/2]</div><p>出口声速和速度分别为：</p><div class="eq">aₑ = √(γRTₑ)　；　cₑ = Maₑ aₑ</div>
+<h3>4. 质量流率与截面积</h3><p>由连续方程 ṁ = ρAc，并结合等熵关系，可得到单位面积质量流率：</p><div class="eq">ṁ/A = (p₀/√T₀)√(γ/R)·Ma·[1+(γ−1)Ma²/2]^[-(γ+1)/(2(γ−1))]</div><p>喉部阻塞时取 Ma = 1，得到临界质量通量 G*，进而求得喉部面积：</p><div class="eq">Aₜ = ṁ/G*　；　dₜ = √(4Aₜ/π)</div><p>出口面积由出口马赫数对应的质量通量求出：</p><div class="eq">Aₑ = ṁ/Gₑ　；　dₑ = √(4Aₑ/π)</div><p>其中 dₜ、dₑ 分别为喉部和出口的等效圆形直径。计算默认圆形截面且速度均匀。</p>
+<h3>5. 喷管轮廓的含义</h3><p>渐缩喷管沿流动方向截面积逐渐减小，最小截面位于出口或出口附近；缩放喷管先收敛至喉部，再由扩张段增大截面积。网页中的轮廓图用于表达几何趋势和相对尺寸，不是可直接加工的精密型线。</p></section>
+<section class="card" id="types"><h2>三、喷管类型与适用工况</h2><table><tr><th>网页名称</th><th>几何特征</th><th>典型流动状态</th></tr><tr><td><b>渐缩喷管</b></td><td>截面积沿流向逐渐减小</td><td>亚声速加速；达到临界状态时出口 Ma 可达 1</td></tr><tr><td><b>缩放喷管</b></td><td>渐缩段 + 喉部 + 扩张段</td><td>阻塞后可在扩张段继续加速至超声速</td></tr></table><p>缩放喷管的设计出口压力与环境背压匹配时，称为理想膨胀。实际背压与设计出口压力不一致时，可能出现欠膨胀、过度膨胀或激波。</p></section>
+<section class="card" id="limits"><h2>四、模型适用范围与工程提醒</h2><ul><li>定比热理想气体假设在温度范围较宽或压力较高时可能产生明显误差。</li><li>真实喷管存在摩擦、边界层、热交换和流动分离，实际出口速度通常低于理想等熵结果。</li><li>当背压低于设计出口压力时，可能发生过度膨胀并形成激波；本网页暂不计算激波位置与总压损失。</li><li>工程定型还需校核结构强度、热应力、振动、材料、冷却、加工公差和安全裕度。</li><li>网页计算得到的面积和直径是初步一维设计值，不能替代 CFD 分析、试验验证和机械设计审查。</li></ul></section>
+<p class="foot">工程热力学喷管设计教学页面 · 与 index.html 放在同一文件夹并一起上传至 GitHub 仓库根目录。</p>
+</div></body></html>
